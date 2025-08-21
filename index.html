@@ -187,14 +187,27 @@
         const extractTextFromImage = async (base64ImageData) => {
             docRequirementsInput.value = '';
             docRequirementsInput.placeholder = '正在辨識圖片內容，請稍候...';
+            generateBtn.disabled = true;
+            buttonText.textContent = '辨識中...';
+
             const prompt = "請從這張公文圖片中，擷取出核心的要求事項，並以條列式（一、二、三...）的方式整理成重點。";
             try {
-                docRequirementsInput.value = (await callImageApi(prompt, base64ImageData)).trim();
+                const extractedText = (await callImageApi(prompt, base64ImageData)).trim();
+                if (extractedText) {
+                    docRequirementsInput.value = extractedText;
+                    docRequirementsInput.placeholder = '上傳圖片後將自動填入，或手動輸入...';
+                    showMessage('圖片辨識成功！', 'success');
+                } else {
+                    docRequirementsInput.placeholder = '圖片中未辨識到有效文字，請手動輸入。';
+                    showMessage('圖片中未辨識到有效文字。', 'info');
+                }
             } catch (error) {
                 console.error("Image analysis failed:", error);
                 docRequirementsInput.placeholder = '圖片辨識失敗，請手動輸入。';
+                showMessage('圖片辨識失敗，請檢查圖片或手動輸入。', 'error');
             } finally {
-                 if(docRequirementsInput.value === '') docRequirementsInput.placeholder = '上傳圖片後將自動填入，或手動輸入...';
+                generateBtn.disabled = false;
+                buttonText.textContent = '產生擬辦內容';
             }
         };
 
@@ -203,8 +216,8 @@
             if (!requirements) { showMessage('請輸入或上傳公文要求重點。', 'error'); return; }
             if (!dueDate) { showMessage('請選擇預定完成日期。', 'error'); return; }
             setLoadingState(true);
-            analysisSection.classList.add('hidden'); // Hide previous analysis
-            analyzeBtn.classList.add('hidden'); // Hide analyze button
+            analysisSection.classList.add('hidden');
+            analyzeBtn.classList.add('hidden');
 
             const prompt = `你是一位經驗豐富且謹慎的臺灣公務員，請根據以下公文要求，草擬一份專業、精簡且格式正確的「預定辦理內容」回覆。請遵循以下指示：1. 使用條列式說明（一、二、三...）。2. 語氣必須正式、客觀、專業。3. 內容需具體回應公文要求，提出可行的辦理方向。4. 在回覆的結尾，加上「預定於 ${new Date(dueDate).getFullYear()}年${new Date(dueDate).getMonth() + 1}月${new Date(dueDate).getDate()}日 前完成。」這句話。---【公文要求重點】\n${requirements}`;
             
@@ -212,7 +225,7 @@
                 const trimmedContent = (await callTextApi(prompt)).trim();
                 generatedTextDiv.textContent = trimmedContent;
                 resultContainer.classList.remove('hidden');
-                analyzeBtn.classList.remove('hidden'); // Show analyze button
+                analyzeBtn.classList.remove('hidden');
                 addRecordToHistory({ id: Date.now().toString(), timestamp: new Date().toISOString(), requirements, dueDate, generatedText: trimmedContent });
             } catch (error) {
                 console.error("API call failed:", error);
@@ -312,7 +325,7 @@
 
         const showMessage = (message, type = 'success') => {
             messageBox.textContent = message;
-            messageBox.className = 'fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-xl transform transition-all duration-300'; // Reset
+            messageBox.className = 'fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-xl transform transition-all duration-300';
             messageBox.classList.add(type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-green-500'), 'opacity-100', 'translate-y-0');
             setTimeout(() => { messageBox.classList.replace('opacity-100', 'opacity-0'); messageBox.classList.replace('translate-y-0', 'translate-y-4'); }, 3000);
         };
