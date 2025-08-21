@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公文擬辦小幫手 (附分析建議)</title>
+    <title>公文擬辦小幫手 (純文字版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,17 +22,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .hidden-file-input {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
         td {
             white-space: pre-wrap;
             word-break: break-word;
@@ -46,26 +35,13 @@
             <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">公文擬辦小幫手</h1>
-                <p class="text-gray-500 mt-2">支援圖片辨識、儲存紀錄，並提供 AI 分析建議</p>
-            </div>
-
-            <!-- Image Upload Section -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">1. 上傳公文截圖 (選填)</label>
-                <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-blue-500 transition">
-                    <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                        <div class="flex text-sm text-gray-600"><label for="file-upload-input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"><span>選擇檔案</span><input id="file-upload-input" name="file-upload" type="file" class="hidden-file-input" accept="image/*"></label><p class="pl-1">或拖曳至此</p></div>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                </div>
-                <div id="image-preview-container" class="mt-4 hidden"><p class="text-sm font-medium text-gray-700 mb-2">圖片預覽：</p><img id="image-preview" src="#" alt="Image preview" class="max-h-60 w-auto rounded-lg shadow-sm mx-auto"/></div>
+                <p class="text-gray-500 mt-2">儲存辦理紀錄，並提供 AI 分析建議</p>
             </div>
 
             <!-- Input Form -->
             <div class="space-y-6">
-                <div><label for="document-requirements" class="block text-sm font-medium text-gray-700 mb-2">2. 公文要求重點</label><textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="上傳圖片後將自動填入，或手動輸入..."></textarea></div>
-                <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">3. 選擇預定完成日期</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
+                <div><label for="document-requirements" class="block text-sm font-medium text-gray-700 mb-2">1. 輸入公文要求重點</label><textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="請在此輸入或貼上公文的重點要求事項..."></textarea></div>
+                <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">2. 選擇預定完成日期</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
                 <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center"><svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg><span id="button-text">產生擬辦內容</span></button>
             </div>
 
@@ -117,7 +93,7 @@
 
     <script>
         // DOM element references
-        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), fileUploadInput = document.getElementById('file-upload-input'), imageDropZone = document.getElementById('image-drop-zone'), imagePreviewContainer = document.getElementById('image-preview-container'), imagePreview = document.getElementById('image-preview'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps');
+        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps');
         const STORAGE_KEY = 'gongwen_history';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -166,54 +142,9 @@
             }
         });
 
-        const handleFileSelect = (file) => {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreviewContainer.classList.remove('hidden');
-                    extractTextFromImage(e.target.result.split(',')[1]);
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
-        imageDropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.add('border-blue-500'); });
-        imageDropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.remove('border-blue-500'); });
-        imageDropZone.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.remove('border-blue-500'); if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]); });
-        imageDropZone.addEventListener('click', () => fileUploadInput.click());
-
-        const extractTextFromImage = async (base64ImageData) => {
-            docRequirementsInput.value = '';
-            docRequirementsInput.placeholder = '正在辨識圖片內容，請稍候...';
-            generateBtn.disabled = true;
-            buttonText.textContent = '辨識中...';
-
-            const prompt = "請從這張公文圖片中，擷取出核心的要求事項，並以條列式（一、二、三...）的方式整理成重點。";
-            try {
-                const extractedText = (await callImageApi(prompt, base64ImageData)).trim();
-                if (extractedText) {
-                    docRequirementsInput.value = extractedText;
-                    docRequirementsInput.placeholder = '上傳圖片後將自動填入，或手動輸入...';
-                    showMessage('圖片辨識成功！', 'success');
-                } else {
-                    docRequirementsInput.placeholder = '圖片中未辨識到有效文字，請手動輸入。';
-                    showMessage('圖片中未辨識到有效文字。', 'info');
-                }
-            } catch (error) {
-                console.error("Image analysis failed:", error);
-                docRequirementsInput.placeholder = '圖片辨識失敗，請手動輸入。';
-                showMessage('圖片辨識失敗，請檢查圖片或手動輸入。', 'error');
-            } finally {
-                generateBtn.disabled = false;
-                buttonText.textContent = '產生擬辦內容';
-            }
-        };
-
         const generateContent = async () => {
             const requirements = docRequirementsInput.value.trim(), dueDate = dueDateInput.value;
-            if (!requirements) { showMessage('請輸入或上傳公文要求重點。', 'error'); return; }
+            if (!requirements) { showMessage('請輸入公文要求重點。', 'error'); return; }
             if (!dueDate) { showMessage('請選擇預定完成日期。', 'error'); return; }
             setLoadingState(true);
             analysisSection.classList.add('hidden');
@@ -288,7 +219,7 @@
         };
 
         const callTextApi = (prompt) => callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', { contents: [{ role: "user", parts: [{ text: prompt }] }] });
-        const callImageApi = (prompt, base64ImageData) => callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: base64ImageData } }] }] });
+        
         const callStructuredApi = (prompt) => {
             const payload = {
                 contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -308,12 +239,10 @@
                 : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
 
             if (isLoading) {
-                // When loading starts: show the output section, show the spinner, and hide any previous results.
                 outputSection.classList.remove('hidden');
                 loadingSpinner.classList.remove('hidden');
                 resultContainer.classList.add('hidden');
             } else {
-                // When loading ends: just hide the spinner. The result container's visibility is handled by the generateContent function.
                 loadingSpinner.classList.add('hidden');
             }
         };
