@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公文擬辦小幫手 (圖片辨識版)</title>
+    <title>公文擬辦小幫手 (附分析建議)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -22,7 +22,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* 讓檔案上傳按鈕視覺上隱藏，但功能保留 */
         .hidden-file-input {
             position: absolute;
             width: 1px;
@@ -34,229 +33,231 @@
             white-space: nowrap;
             border-width: 0;
         }
+        td {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
     </style>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
-    <div class="w-full max-w-3xl mx-auto p-4 sm:p-6 md:p-8">
+<body class="bg-gray-50 flex items-center justify-center min-h-screen py-12">
+    <div class="w-full max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
         <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
             
             <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">公文擬辦小幫手</h1>
-                <p class="text-gray-500 mt-2">支援圖片辨識，自動擷取公文重點</p>
+                <p class="text-gray-500 mt-2">支援圖片辨識、儲存紀錄，並提供 AI 分析建議</p>
             </div>
 
             <!-- Image Upload Section -->
             <div class="mb-6">
-                <label for="file-upload" class="block text-sm font-medium text-gray-700 mb-2">1. 上傳公文截圖 (選填)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">1. 上傳公文截圖 (選填)</label>
                 <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-blue-500 transition">
                     <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <div class="flex text-sm text-gray-600">
-                            <label for="file-upload-input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                <span>選擇檔案</span>
-                                <input id="file-upload-input" name="file-upload" type="file" class="hidden-file-input" accept="image/*">
-                            </label>
-                            <p class="pl-1">或拖曳至此</p>
-                        </div>
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <div class="flex text-sm text-gray-600"><label for="file-upload-input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"><span>選擇檔案</span><input id="file-upload-input" name="file-upload" type="file" class="hidden-file-input" accept="image/*"></label><p class="pl-1">或拖曳至此</p></div>
                         <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                     </div>
                 </div>
-                <div id="image-preview-container" class="mt-4 hidden">
-                    <p class="text-sm font-medium text-gray-700 mb-2">圖片預覽：</p>
-                    <img id="image-preview" src="#" alt="Image preview" class="max-h-60 w-auto rounded-lg shadow-sm mx-auto"/>
-                </div>
+                <div id="image-preview-container" class="mt-4 hidden"><p class="text-sm font-medium text-gray-700 mb-2">圖片預覽：</p><img id="image-preview" src="#" alt="Image preview" class="max-h-60 w-auto rounded-lg shadow-sm mx-auto"/></div>
             </div>
 
             <!-- Input Form -->
             <div class="space-y-6">
-                <div>
-                    <label for="document-requirements" class="block text-sm font-medium text-gray-700 mb-2">2. 公文要求重點</label>
-                    <textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="上傳圖片後將自動填入，或手動輸入..."></textarea>
-                </div>
-
-                <div>
-                    <label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">3. 選擇預定完成日期</label>
-                    <input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
-                </div>
-
-                <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center">
-                    <svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                    <span id="button-text">產生擬辦內容</span>
-                </button>
+                <div><label for="document-requirements" class="block text-sm font-medium text-gray-700 mb-2">2. 公文要求重點</label><textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="上傳圖片後將自動填入，或手動輸入..."></textarea></div>
+                <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">3. 選擇預定完成日期</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
+                <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center"><svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg><span id="button-text">產生擬辦內容</span></button>
             </div>
 
             <!-- Output Section -->
             <div id="output-section" class="mt-8 pt-6 border-t border-gray-200 hidden">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">產生的回覆內容：</h2>
-                <div id="loading-spinner" class="flex justify-center items-center h-40">
-                    <div class="loader"></div>
-                </div>
+                <div id="loading-spinner" class="flex justify-center items-center h-40"><div class="loader"></div></div>
                 <div id="result-container" class="hidden">
                     <div id="generated-text" class="w-full p-4 bg-gray-100 border border-gray-200 rounded-lg whitespace-pre-wrap min-h-[150px]"></div>
-                    <button id="copy-btn" class="mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-150 ease-in-out flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                        </svg>
-                        複製內容
-                    </button>
+                    <div class="mt-4 flex space-x-2">
+                        <button id="copy-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-150 ease-in-out flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>複製內容</button>
+                        <button id="analyze-btn" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out flex items-center hidden">✨ 分析與建議</button>
+                    </div>
+                </div>
+                <!-- AI Analysis Section -->
+                <div id="analysis-section" class="mt-6 hidden">
+                    <div id="analysis-loading" class="flex items-center text-gray-500"><div class="loader !w-20 !h-20 !border-2 mr-4"></div><span>AI 正在為您分析，請稍候...</span></div>
+                    <div id="analysis-result" class="hidden space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">建議主旨：</h3>
+                            <p id="suggested-subject" class="mt-1 p-3 bg-gray-100 rounded-md"></p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">後續步驟建議：</h3>
+                            <ul id="suggested-steps" class="mt-1 list-disc list-inside space-y-1 p-3 bg-gray-100 rounded-md"></ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Message Box -->
-        <div id="message-box" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-xl opacity-0 transform translate-y-4 transition-all duration-300">
-            已成功複製！
+        <!-- History Table Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">歷次回覆紀錄</h2>
+                <button id="clear-history-btn" class="bg-red-500 text-white text-sm font-bold py-2 px-3 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition duration-150 ease-in-out">清除所有紀錄</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50"><tr><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產生日期</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">要求重點</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">擬辦內容</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預定完成日</th><th scope="col" class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th></tr></thead>
+                    <tbody id="history-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+                 <p id="no-history-msg" class="text-center text-gray-500 py-8">目前沒有任何歷史紀錄。</p>
+            </div>
         </div>
+
+        <div id="message-box" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-xl opacity-0 transform translate-y-4 transition-all duration-300"></div>
     </div>
 
     <script>
         // DOM element references
-        const generateBtn = document.getElementById('generate-btn');
-        const buttonText = document.getElementById('button-text');
-        const buttonIcon = document.getElementById('button-icon');
-        const docRequirementsInput = document.getElementById('document-requirements');
-        const dueDateInput = document.getElementById('due-date');
-        const outputSection = document.getElementById('output-section');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const resultContainer = document.getElementById('result-container');
-        const generatedTextDiv = document.getElementById('generated-text');
-        const copyBtn = document.getElementById('copy-btn');
-        const messageBox = document.getElementById('message-box');
-        const fileUploadInput = document.getElementById('file-upload-input');
-        const imageDropZone = document.getElementById('image-drop-zone');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
+        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), fileUploadInput = document.getElementById('file-upload-input'), imageDropZone = document.getElementById('image-drop-zone'), imagePreviewContainer = document.getElementById('image-preview-container'), imagePreview = document.getElementById('image-preview'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps');
+        const STORAGE_KEY = 'gongwen_history';
 
-        // Set default due date to 7 days from now
-        const today = new Date();
-        const defaultDueDate = new Date(today);
-        defaultDueDate.setDate(today.getDate() + 7);
-        dueDateInput.value = defaultDueDate.toISOString().split('T')[0];
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date(), defaultDueDate = new Date(today);
+            defaultDueDate.setDate(today.getDate() + 7);
+            dueDateInput.value = defaultDueDate.toISOString().split('T')[0];
+            loadHistory();
+        });
+
+        const getHistory = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const saveHistory = (history) => localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+
+        const loadHistory = () => {
+            historyTableBody.innerHTML = '';
+            const history = getHistory();
+            noHistoryMsg.classList.toggle('hidden', history.length > 0);
+            history.forEach(addRecordToTable);
+        };
+
+        const addRecordToHistory = (record) => {
+            const history = getHistory();
+            history.unshift(record);
+            saveHistory(history);
+            loadHistory();
+        };
         
-        // --- Image Upload and Processing ---
+        const addRecordToTable = (record) => {
+            const row = document.createElement('tr');
+            row.dataset.id = record.id;
+            row.innerHTML = `<td class="px-4 py-4 text-sm text-gray-500">${new Date(record.timestamp).toLocaleString('zh-TW')}</td><td class="px-4 py-4 text-sm text-gray-900">${record.requirements}</td><td class="px-4 py-4 text-sm text-gray-900">${record.generatedText}</td><td class="px-4 py-4 text-sm text-gray-500">${record.dueDate}</td><td class="px-2 py-4 text-center"><button class="delete-btn text-red-500 hover:text-red-700" title="刪除此筆紀錄"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></td>`;
+            historyTableBody.appendChild(row);
+            row.querySelector('.delete-btn').addEventListener('click', () => deleteRecord(record.id));
+        };
+
+        const deleteRecord = (id) => {
+            saveHistory(getHistory().filter(record => record.id !== id));
+            loadHistory();
+            showMessage('紀錄已刪除', 'info');
+        };
+
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('您確定要清除所有歷史紀錄嗎？此操作無法復原。')) {
+                localStorage.removeItem(STORAGE_KEY);
+                loadHistory();
+                showMessage('所有紀錄已清除', 'info');
+            }
+        });
+
         const handleFileSelect = (file) => {
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     imagePreview.src = e.target.result;
                     imagePreviewContainer.classList.remove('hidden');
-                    
-                    // Extract base64 data for API call
-                    const base64ImageData = e.target.result.split(',')[1];
-                    extractTextFromImage(base64ImageData);
+                    extractTextFromImage(e.target.result.split(',')[1]);
                 };
                 reader.readAsDataURL(file);
             }
         };
 
-        fileUploadInput.addEventListener('change', (e) => {
-            handleFileSelect(e.target.files[0]);
-        });
+        fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+        imageDropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.add('border-blue-500'); });
+        imageDropZone.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.remove('border-blue-500'); });
+        imageDropZone.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); imageDropZone.classList.remove('border-blue-500'); if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]); });
+        imageDropZone.addEventListener('click', () => fileUploadInput.click());
 
-        // Drag and Drop functionality
-        imageDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            imageDropZone.classList.add('border-blue-500');
-        });
-        imageDropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            imageDropZone.classList.remove('border-blue-500');
-        });
-        imageDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            imageDropZone.classList.remove('border-blue-500');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect(files[0]);
-            }
-        });
-        imageDropZone.addEventListener('click', () => {
-            fileUploadInput.click();
-        });
-
-        // --- Function to Extract Text from Image ---
         const extractTextFromImage = async (base64ImageData) => {
             docRequirementsInput.value = '';
             docRequirementsInput.placeholder = '正在辨識圖片內容，請稍候...';
-            
             const prompt = "請從這張公文圖片中，擷取出核心的要求事項，並以條列式（一、二、三...）的方式整理成重點。";
-            
             try {
-                const extractedText = await callImageApi(prompt, base64ImageData);
-                docRequirementsInput.value = extractedText.trim();
-                docRequirementsInput.placeholder = '上傳圖片後將自動填入，或手動輸入...';
+                docRequirementsInput.value = (await callImageApi(prompt, base64ImageData)).trim();
             } catch (error) {
                 console.error("Image analysis failed:", error);
                 docRequirementsInput.placeholder = '圖片辨識失敗，請手動輸入。';
+            } finally {
+                 if(docRequirementsInput.value === '') docRequirementsInput.placeholder = '上傳圖片後將自動填入，或手動輸入...';
             }
         };
 
-        // --- Main Function to Generate Content ---
         const generateContent = async () => {
-            const requirements = docRequirementsInput.value.trim();
-            const dueDate = dueDateInput.value;
+            const requirements = docRequirementsInput.value.trim(), dueDate = dueDateInput.value;
+            if (!requirements) { showMessage('請輸入或上傳公文要求重點。', 'error'); return; }
+            if (!dueDate) { showMessage('請選擇預定完成日期。', 'error'); return; }
+            setLoadingState(true);
+            analysisSection.classList.add('hidden'); // Hide previous analysis
+            analyzeBtn.classList.add('hidden'); // Hide analyze button
 
-            if (!requirements) {
-                // Changed alert to a more modern notification if possible, but alert is fine for now.
-                showCustomAlert('請輸入或上傳公文要求重點。');
-                return;
-            }
-            if (!dueDate) {
-                showCustomAlert('請選擇預定完成日期。');
-                return;
-            }
-
-            setLoadingState(true, 'generate');
-
-            const prompt = `你是一位經驗豐富且謹慎的臺灣公務員，請根據以下公文要求，草擬一份專業、精簡且格式正確的「預定辦理內容」回覆。
-請遵循以下指示：
-1.  使用條列式說明（一、二、三...）。
-2.  語氣必須正式、客觀、專業。
-3.  內容需具體回應公文要求，提出可行的辦理方向。
-4.  在回覆的結尾，加上「預定於 ${new Date(dueDate).getFullYear()}年${new Date(dueDate).getMonth() + 1}月${new Date(dueDate).getDate()}日 前完成。」這句話。
-
----
-【公文要求重點】
-${requirements}
-`;
+            const prompt = `你是一位經驗豐富且謹慎的臺灣公務員，請根據以下公文要求，草擬一份專業、精簡且格式正確的「預定辦理內容」回覆。請遵循以下指示：1. 使用條列式說明（一、二、三...）。2. 語氣必須正式、客觀、專業。3. 內容需具體回應公文要求，提出可行的辦理方向。4. 在回覆的結尾，加上「預定於 ${new Date(dueDate).getFullYear()}年${new Date(dueDate).getMonth() + 1}月${new Date(dueDate).getDate()}日 前完成。」這句話。---【公文要求重點】\n${requirements}`;
             
             try {
-                const generatedContent = await callTextApi(prompt);
-                generatedTextDiv.textContent = generatedContent.trim();
+                const trimmedContent = (await callTextApi(prompt)).trim();
+                generatedTextDiv.textContent = trimmedContent;
                 resultContainer.classList.remove('hidden');
+                analyzeBtn.classList.remove('hidden'); // Show analyze button
+                addRecordToHistory({ id: Date.now().toString(), timestamp: new Date().toISOString(), requirements, dueDate, generatedText: trimmedContent });
             } catch (error) {
                 console.error("API call failed:", error);
                 generatedTextDiv.textContent = '內容生成失敗，請稍後再試。';
                 resultContainer.classList.remove('hidden');
             } finally {
-                setLoadingState(false, 'generate');
+                setLoadingState(false);
+            }
+        };
+
+        const analyzeContent = async () => {
+            const generatedText = generatedTextDiv.textContent;
+            if (!generatedText) return;
+            
+            analysisSection.classList.remove('hidden');
+            analysisResult.classList.add('hidden');
+            analysisLoading.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+
+            const prompt = `你是一位經驗豐富、思慮周全的臺灣資深公務員。請審閱以下這份擬辦內容，並提供：\n1. 一個精簡且正式的「主旨」。\n2. 一份條列式的「後續步驟建議」，提示承辦人接下來該做什麼或聯繫誰。\n請以 JSON 格式回傳，格式為 { "subject": "你的建議主旨", "next_steps": ["建議步驟一", "建議步驟二"] }。\n\n【擬辦內容】\n${generatedText}`;
+
+            try {
+                const resultJson = await callStructuredApi(prompt);
+                const result = JSON.parse(resultJson);
+                suggestedSubject.textContent = result.subject;
+                suggestedSteps.innerHTML = result.next_steps.map(step => `<li>${step}</li>`).join('');
+                analysisResult.classList.remove('hidden');
+            } catch (error) {
+                console.error("Analysis API call failed:", error);
+                suggestedSubject.textContent = '分析失敗，請稍後再試。';
+                suggestedSteps.innerHTML = '';
+                analysisResult.classList.remove('hidden');
+            } finally {
+                analysisLoading.classList.add('hidden');
+                analyzeBtn.disabled = false;
             }
         };
         
-        // --- API Call Functions with Retry Logic ---
         const callApiWithRetry = async (apiUrl, payload, retries = 3, delay = 1000) => {
-             const apiKey = ""; // API key is handled by the environment
+             const apiKey = "";
              const fullApiUrl = `${apiUrl}?key=${apiKey}`;
-
             for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetch(fullApiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
+                    const response = await fetch(fullApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
                     const result = await response.json();
                     if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                         return result.candidates[0].content.parts[0].text;
@@ -267,54 +268,34 @@ ${requirements}
                     console.warn(`API call attempt ${i + 1} failed. Retrying in ${delay}ms...`);
                     if (i < retries - 1) {
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Exponential backoff
-                    } else {
-                        throw error;
-                    }
+                        delay *= 2;
+                    } else { throw error; }
                 }
             }
         };
 
-        const callTextApi = (prompt) => {
-            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            return callApiWithRetry(apiUrl, payload);
-        };
-
-        const callImageApi = (prompt, base64ImageData) => {
-            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
+        const callTextApi = (prompt) => callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', { contents: [{ role: "user", parts: [{ text: prompt }] }] });
+        const callImageApi = (prompt, base64ImageData) => callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: base64ImageData } }] }] });
+        const callStructuredApi = (prompt) => {
             const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: prompt },
-                        { inlineData: { mimeType: "image/png", data: base64ImageData } }
-                    ]
-                }]
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: { type: "OBJECT", properties: { subject: { type: "STRING" }, next_steps: { type: "ARRAY", items: { type: "STRING" }}}, required: ["subject", "next_steps"] }
+                }
             };
-            return callApiWithRetry(apiUrl, payload);
+            return callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', payload);
         };
 
-        // --- UI State Management ---
-        const setLoadingState = (isLoading, type) => {
-            if (type === 'generate') {
-                if (isLoading) {
-                    generateBtn.disabled = true;
-                    buttonText.textContent = '生成中...';
-                    buttonIcon.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-                    outputSection.classList.remove('hidden');
-                    loadingSpinner.classList.remove('hidden');
-                    resultContainer.classList.add('hidden');
-                } else {
-                    generateBtn.disabled = false;
-                    buttonText.textContent = '產生擬辦內容';
-                    buttonIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
-                    loadingSpinner.classList.add('hidden');
-                }
-            }
+        const setLoadingState = (isLoading) => {
+            generateBtn.disabled = isLoading;
+            buttonText.textContent = isLoading ? '生成中...' : '產生擬辦內容';
+            buttonIcon.innerHTML = isLoading ? `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
+            outputSection.classList.toggle('hidden', !isLoading);
+            loadingSpinner.classList.toggle('hidden', !isLoading);
+            resultContainer.classList.add('hidden');
         };
         
-        // --- Utility Functions ---
         const copyToClipboard = () => {
             const textToCopy = generatedTextDiv.textContent;
             if (!textToCopy) return;
@@ -324,46 +305,21 @@ ${requirements}
             tempTextArea.select();
             try {
                 document.execCommand('copy');
-                showCopyMessage();
-            } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
-            }
+                showMessage('已成功複製！', 'success');
+            } catch (err) { console.error('Fallback: Oops, unable to copy', err); }
             document.body.removeChild(tempTextArea);
         };
 
-        const showCopyMessage = () => {
-            messageBox.classList.remove('opacity-0', 'translate-y-4');
-            messageBox.classList.add('opacity-100', 'translate-y-0');
-            setTimeout(() => {
-                messageBox.classList.remove('opacity-100', 'translate-y-0');
-                messageBox.classList.add('opacity-0', 'translate-y-4');
-            }, 2000);
-        };
-        
-        // A simple replacement for alert()
-        const showCustomAlert = (message) => {
-            // In a real app, you'd create a modal here.
-            // For this environment, we'll reuse the message box.
-            const alertBox = document.getElementById('message-box');
-            alertBox.textContent = message;
-            alertBox.classList.remove('bg-green-500');
-            alertBox.classList.add('bg-red-500');
-            alertBox.classList.remove('opacity-0', 'translate-y-4');
-            alertBox.classList.add('opacity-100', 'translate-y-0');
-            setTimeout(() => {
-                alertBox.classList.remove('opacity-100', 'translate-y-0');
-                alertBox.classList.add('opacity-0', 'translate-y-4');
-                // Reset to original state
-                alertBox.textContent = '已成功複製！';
-                alertBox.classList.remove('bg-red-500');
-                alertBox.classList.add('bg-green-500');
-            }, 3000);
+        const showMessage = (message, type = 'success') => {
+            messageBox.textContent = message;
+            messageBox.className = 'fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-xl transform transition-all duration-300'; // Reset
+            messageBox.classList.add(type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-green-500'), 'opacity-100', 'translate-y-0');
+            setTimeout(() => { messageBox.classList.replace('opacity-100', 'opacity-0'); messageBox.classList.replace('translate-y-0', 'translate-y-4'); }, 3000);
         };
 
-        // --- Event Listeners ---
         generateBtn.addEventListener('click', generateContent);
         copyBtn.addEventListener('click', copyToClipboard);
-
+        analyzeBtn.addEventListener('click', analyzeContent);
     </script>
 </body>
 </html>
