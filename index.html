@@ -195,7 +195,7 @@
             }
         };
         
-        const callApiWithRetry = async (apiUrl, payload, retries = 3, delay = 1000) => {
+        const callApiWithRetry = async (apiUrl, payload, retries = 5, delay = 1500) => { // Increased retries and delay
              const apiKey = "";
              const fullApiUrl = `${apiUrl}?key=${apiKey}`;
             for (let i = 0; i < retries; i++) {
@@ -206,14 +206,18 @@
                     if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                         return result.candidates[0].content.parts[0].text;
                     } else {
-                        throw new Error("Invalid API response structure.");
+                        // If the response is valid but there's no content, it's still a form of failure for this attempt.
+                        throw new Error("Invalid API response structure or empty content.");
                     }
                 } catch (error) {
                     console.warn(`API call attempt ${i + 1} failed. Retrying in ${delay}ms...`);
                     if (i < retries - 1) {
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                    } else { throw error; }
+                        delay *= 2; // Exponential backoff
+                    } else { 
+                        console.error("API call failed after all retries.");
+                        throw error; 
+                    }
                 }
             }
         };
