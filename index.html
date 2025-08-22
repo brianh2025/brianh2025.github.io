@@ -40,7 +40,13 @@
 
             <!-- Input Form -->
             <div class="space-y-6">
-                <div><label for="document-requirements" class="block text-sm font-medium text-gray-700 mb-2">1. 輸入公文要求重點</label><textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="請在此輸入或貼上公文的重點要求事項..."></textarea></div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="document-requirements" class="block text-sm font-medium text-gray-700">1. 輸入公文要求重點</label>
+                        <button id="preset-btn-archive" class="text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-3 py-1 transition">填入歸檔範本</button>
+                    </div>
+                    <textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="請在此輸入或貼上公文的重點要求事項..."></textarea>
+                </div>
                 <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">2. 選擇預定完成日期</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
                 <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center"><svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg><span id="button-text">產生擬辦內容</span></button>
             </div>
@@ -93,7 +99,7 @@
 
     <script>
         // DOM element references
-        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps');
+        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps'), presetBtnArchive = document.getElementById('preset-btn-archive');
         const STORAGE_KEY = 'gongwen_history';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -150,7 +156,9 @@
             analysisSection.classList.add('hidden');
             analyzeBtn.classList.add('hidden');
 
-            const prompt = `你是一位經驗豐富且謹慎的臺灣公務員，請根據以下公文要求，草擬一份專業、精簡且格式正確的「預定辦理內容」回覆。請遵循以下指示：1. 使用條列式說明（一、二、三...）。2. 語氣必須正式、客觀、專業。3. 內容需具體回應公文要求，提出可行的辦理方向。4. 在回覆的結尾，加上「預定於 ${new Date(dueDate).getFullYear()}年${new Date(dueDate).getMonth() + 1}月${new Date(dueDate).getDate()}日 前完成。」這句話。---【公文要求重點】\n${requirements}`;
+            const date = new Date(dueDate);
+            const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            const prompt = `請根據以下公文要求，草擬一份專業、條列式的「預定辦理內容」回覆。回覆內容須具體可行，語氣正式。回覆的結尾必須是「預定於 ${formattedDate} 前完成。」\n\n---公文要求重點---\n${requirements}`;
             
             try {
                 const trimmedContent = (await callTextApi(prompt)).trim();
@@ -176,7 +184,7 @@
             analysisLoading.classList.remove('hidden');
             analyzeBtn.disabled = true;
 
-            const prompt = `你是一位經驗豐富、思慮周全的臺灣資深公務員。請審閱以下這份擬辦內容，並提供：\n1. 一個精簡且正式的「主旨」。\n2. 一份條列式的「後續步驟建議」，提示承辦人接下來該做什麼或聯繫誰。\n請以 JSON 格式回傳，格式為 { "subject": "你的建議主旨", "next_steps": ["建議步驟一", "建議步驟二"] }。\n\n【擬辦內容】\n${generatedText}`;
+            const prompt = `請審閱以下這份公文的擬辦內容，並提供：\n1. 一個精簡且正式的「主旨」。\n2. 一份條列式的「後續步驟建議」，提示承辦人接下來該做什麼或聯繫誰。\n請以 JSON 格式回傳，格式為 { "subject": "你的建議主旨", "next_steps": ["建議步驟一", "建議步驟二"] }。\n\n---擬辦內容---\n${generatedText}`;
 
             try {
                 const resultJson = await callStructuredApi(prompt);
@@ -195,7 +203,7 @@
             }
         };
         
-        const callApiWithRetry = async (apiUrl, payload, retries = 5, delay = 1500) => { // Increased retries and delay
+        const callApiWithRetry = async (apiUrl, payload, retries = 5, delay = 1500) => {
              const apiKey = "";
              const fullApiUrl = `${apiUrl}?key=${apiKey}`;
             for (let i = 0; i < retries; i++) {
@@ -206,14 +214,14 @@
                     if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                         return result.candidates[0].content.parts[0].text;
                     } else {
-                        // If the response is valid but there's no content, it's still a form of failure for this attempt.
-                        throw new Error("Invalid API response structure or empty content.");
+                        const reason = result?.promptFeedback?.blockReason || 'Unknown reason';
+                        throw new Error(`Invalid API response structure or empty content. Reason: ${reason}`);
                     }
                 } catch (error) {
-                    console.warn(`API call attempt ${i + 1} failed. Retrying in ${delay}ms...`);
+                    console.warn(`API call attempt ${i + 1} failed with error: ${error.message}. Retrying in ${delay}ms...`);
                     if (i < retries - 1) {
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // Exponential backoff
+                        delay *= 1.5; // Less aggressive backoff
                     } else { 
                         console.error("API call failed after all retries.");
                         throw error; 
@@ -275,6 +283,11 @@
         generateBtn.addEventListener('click', generateContent);
         copyBtn.addEventListener('click', copyToClipboard);
         analyzeBtn.addEventListener('click', analyzeContent);
+        presetBtnArchive.addEventListener('click', () => {
+            const presetText = "轉行政助理XX，函文相關核定之紙本及電子檔進行歸檔作業，作業完成後佈達歸檔位置。";
+            docRequirementsInput.value = presetText;
+            showMessage('已填入歸檔範本', 'info');
+        });
     </script>
 </body>
 </html>
