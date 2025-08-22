@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公文擬辦小幫手 (純文字版)</title>
+    <title>公文處理方式快速回覆</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -34,12 +34,16 @@
             
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">公文擬辦小幫手</h1>
-                <p class="text-gray-500 mt-2">儲存辦理紀錄，並提供 AI 分析建議</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">公文處理方式快速回覆</h1>
+                <p class="text-gray-500 mt-2">輸入重點，快速產生簡要處理方式的回覆</p>
             </div>
 
             <!-- Input Form -->
             <div class="space-y-6">
+                <div>
+                    <label for="api-key-input" class="block text-sm font-medium text-gray-700 mb-2">您的 Gemini API 金鑰 (選填)</label>
+                    <input type="password" id="api-key-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out" placeholder="若留空，將使用預設模型">
+                </div>
                 <div>
                     <div class="flex justify-between items-center mb-2">
                         <label for="document-requirements" class="block text-sm font-medium text-gray-700">1. 輸入公文要求重點</label>
@@ -47,8 +51,8 @@
                     </div>
                     <textarea id="document-requirements" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="請在此輸入或貼上公文的重點要求事項..."></textarea>
                 </div>
-                <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">2. 選擇預定完成日期</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
-                <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center"><svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg><span id="button-text">產生擬辦內容</span></button>
+                <div><label for="due-date" class="block text-sm font-medium text-gray-700 mb-2">2. 選擇預定完成日期 (參考用)</label><input type="date" id="due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"></div>
+                <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out flex items-center justify-center"><svg id="button-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg><span id="button-text">產生回覆</span></button>
             </div>
 
             <!-- Output Section -->
@@ -56,24 +60,9 @@
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">產生的回覆內容：</h2>
                 <div id="loading-spinner" class="flex justify-center items-center h-40"><div class="loader"></div></div>
                 <div id="result-container" class="hidden">
-                    <div id="generated-text" class="w-full p-4 bg-gray-100 border border-gray-200 rounded-lg whitespace-pre-wrap min-h-[150px]"></div>
+                    <div id="generated-text" class="w-full p-4 bg-gray-100 border border-gray-200 rounded-lg whitespace-pre-wrap min-h-[100px]"></div>
                     <div class="mt-4 flex space-x-2">
                         <button id="copy-btn" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-150 ease-in-out flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>複製內容</button>
-                        <button id="analyze-btn" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150 ease-in-out flex items-center hidden">✨ 分析與建議</button>
-                    </div>
-                </div>
-                <!-- AI Analysis Section -->
-                <div id="analysis-section" class="mt-6 hidden">
-                    <div id="analysis-loading" class="flex items-center text-gray-500"><div class="loader !w-20 !h-20 !border-2 mr-4"></div><span>AI 正在為您分析，請稍候...</span></div>
-                    <div id="analysis-result" class="hidden space-y-4">
-                        <div>
-                            <h3 class="font-semibold text-gray-800">建議主旨：</h3>
-                            <p id="suggested-subject" class="mt-1 p-3 bg-gray-100 rounded-md"></p>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-800">後續步驟建議：</h3>
-                            <ul id="suggested-steps" class="mt-1 list-disc list-inside space-y-1 p-3 bg-gray-100 rounded-md"></ul>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -87,7 +76,7 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50"><tr><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產生日期</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">要求重點</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">擬辦內容</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預定完成日</th><th scope="col" class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th></tr></thead>
+                    <thead class="bg-gray-50"><tr><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產生日期</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">輸入重點</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產生回覆</th><th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">參考完成日</th><th scope="col" class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th></tr></thead>
                     <tbody id="history-table-body" class="bg-white divide-y divide-gray-200"></tbody>
                 </table>
                  <p id="no-history-msg" class="text-center text-gray-500 py-8">目前沒有任何歷史紀錄。</p>
@@ -99,18 +88,25 @@
 
     <script>
         // DOM element references
-        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), analyzeBtn = document.getElementById('analyze-btn'), analysisSection = document.getElementById('analysis-section'), analysisLoading = document.getElementById('analysis-loading'), analysisResult = document.getElementById('analysis-result'), suggestedSubject = document.getElementById('suggested-subject'), suggestedSteps = document.getElementById('suggested-steps'), presetBtnArchive = document.getElementById('preset-btn-archive');
-        const STORAGE_KEY = 'gongwen_history';
+        const generateBtn = document.getElementById('generate-btn'), buttonText = document.getElementById('button-text'), buttonIcon = document.getElementById('button-icon'), docRequirementsInput = document.getElementById('document-requirements'), dueDateInput = document.getElementById('due-date'), outputSection = document.getElementById('output-section'), loadingSpinner = document.getElementById('loading-spinner'), resultContainer = document.getElementById('result-container'), generatedTextDiv = document.getElementById('generated-text'), copyBtn = document.getElementById('copy-btn'), messageBox = document.getElementById('message-box'), historyTableBody = document.getElementById('history-table-body'), clearHistoryBtn = document.getElementById('clear-history-btn'), noHistoryMsg = document.getElementById('no-history-msg'), presetBtnArchive = document.getElementById('preset-btn-archive'), apiKeyInput = document.getElementById('api-key-input');
+        const STORAGE_KEY_HISTORY = 'gongwen_history_brief';
+        const STORAGE_KEY_API = 'gemini_api_key';
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date(), defaultDueDate = new Date(today);
             defaultDueDate.setDate(today.getDate() + 7);
             dueDateInput.value = defaultDueDate.toISOString().split('T')[0];
+            
+            // Load saved history and API key
             loadHistory();
+            const savedApiKey = localStorage.getItem(STORAGE_KEY_API);
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
         });
 
-        const getHistory = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        const saveHistory = (history) => localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        const getHistory = () => JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || [];
+        const saveHistory = (history) => localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
 
         const loadHistory = () => {
             historyTableBody.innerHTML = '';
@@ -142,7 +138,7 @@
 
         clearHistoryBtn.addEventListener('click', () => {
             if (confirm('您確定要清除所有歷史紀錄嗎？此操作無法復原。')) {
-                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_KEY_HISTORY);
                 loadHistory();
                 showMessage('所有紀錄已清除', 'info');
             }
@@ -153,18 +149,13 @@
             if (!requirements) { showMessage('請輸入公文要求重點。', 'error'); return; }
             if (!dueDate) { showMessage('請選擇預定完成日期。', 'error'); return; }
             setLoadingState(true);
-            analysisSection.classList.add('hidden');
-            analyzeBtn.classList.add('hidden');
 
-            const date = new Date(dueDate);
-            const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-            const prompt = `請根據以下公文要求，草擬一份專業、條列式的「預定辦理內容」回覆。回覆內容須具體可行，語氣正式。回覆的結尾必須是「預定於 ${formattedDate} 前完成。」\n\n---公文要求重點---\n${requirements}`;
+            const prompt = `針對以下公文重點，請用一段簡潔、專業的文字，回覆預計的處理方式。\n\n---公文重點---\n${requirements}`;
             
             try {
                 const trimmedContent = (await callTextApi(prompt)).trim();
                 generatedTextDiv.textContent = trimmedContent;
                 resultContainer.classList.remove('hidden');
-                analyzeBtn.classList.remove('hidden');
                 addRecordToHistory({ id: Date.now().toString(), timestamp: new Date().toISOString(), requirements, dueDate, generatedText: trimmedContent });
             } catch (error) {
                 console.error("API call failed:", error);
@@ -174,37 +165,9 @@
                 setLoadingState(false);
             }
         };
-
-        const analyzeContent = async () => {
-            const generatedText = generatedTextDiv.textContent;
-            if (!generatedText) return;
-            
-            analysisSection.classList.remove('hidden');
-            analysisResult.classList.add('hidden');
-            analysisLoading.classList.remove('hidden');
-            analyzeBtn.disabled = true;
-
-            const prompt = `請審閱以下這份公文的擬辦內容，並提供：\n1. 一個精簡且正式的「主旨」。\n2. 一份條列式的「後續步驟建議」，提示承辦人接下來該做什麼或聯繫誰。\n請以 JSON 格式回傳，格式為 { "subject": "你的建議主旨", "next_steps": ["建議步驟一", "建議步驟二"] }。\n\n---擬辦內容---\n${generatedText}`;
-
-            try {
-                const resultJson = await callStructuredApi(prompt);
-                const result = JSON.parse(resultJson);
-                suggestedSubject.textContent = result.subject;
-                suggestedSteps.innerHTML = result.next_steps.map(step => `<li>${step}</li>`).join('');
-                analysisResult.classList.remove('hidden');
-            } catch (error) {
-                console.error("Analysis API call failed:", error);
-                suggestedSubject.textContent = '分析失敗，請稍後再試。';
-                suggestedSteps.innerHTML = '';
-                analysisResult.classList.remove('hidden');
-            } finally {
-                analysisLoading.classList.add('hidden');
-                analyzeBtn.disabled = false;
-            }
-        };
         
         const callApiWithRetry = async (apiUrl, payload, retries = 5, delay = 1500) => {
-             const apiKey = "";
+             const apiKey = apiKeyInput.value.trim(); // Use the key from the input field
              const fullApiUrl = `${apiUrl}?key=${apiKey}`;
             for (let i = 0; i < retries; i++) {
                 try {
@@ -221,7 +184,7 @@
                     console.warn(`API call attempt ${i + 1} failed with error: ${error.message}. Retrying in ${delay}ms...`);
                     if (i < retries - 1) {
                         await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 1.5; // Less aggressive backoff
+                        delay *= 1.5;
                     } else { 
                         console.error("API call failed after all retries.");
                         throw error; 
@@ -231,21 +194,10 @@
         };
 
         const callTextApi = (prompt) => callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', { contents: [{ role: "user", parts: [{ text: prompt }] }] });
-        
-        const callStructuredApi = (prompt) => {
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: { type: "OBJECT", properties: { subject: { type: "STRING" }, next_steps: { type: "ARRAY", items: { type: "STRING" }}}, required: ["subject", "next_steps"] }
-                }
-            };
-            return callApiWithRetry('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent', payload);
-        };
 
         const setLoadingState = (isLoading) => {
             generateBtn.disabled = isLoading;
-            buttonText.textContent = isLoading ? '生成中...' : '產生擬辦內容';
+            buttonText.textContent = isLoading ? '生成中...' : '產生回覆';
             buttonIcon.innerHTML = isLoading 
                 ? `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>` 
                 : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
@@ -280,13 +232,16 @@
             setTimeout(() => { messageBox.classList.replace('opacity-100', 'opacity-0'); messageBox.classList.replace('translate-y-0', 'translate-y-4'); }, 3000);
         };
 
+        // Event Listeners
         generateBtn.addEventListener('click', generateContent);
         copyBtn.addEventListener('click', copyToClipboard);
-        analyzeBtn.addEventListener('click', analyzeContent);
         presetBtnArchive.addEventListener('click', () => {
             const presetText = "轉行政助理XX，函文相關核定之紙本及電子檔進行歸檔作業，作業完成後佈達歸檔位置。";
             docRequirementsInput.value = presetText;
             showMessage('已填入歸檔範本', 'info');
+        });
+        apiKeyInput.addEventListener('input', (e) => {
+            localStorage.setItem(STORAGE_KEY_API, e.target.value);
         });
     </script>
 </body>
